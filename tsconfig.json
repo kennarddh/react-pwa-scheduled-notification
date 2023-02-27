@@ -19,7 +19,11 @@
 		"removeComments": true,
 		"sourceMap": true,
 		"noImplicitAny": true,
-		"types": ["jest", "@testing-library/jest-dom", "vite-plugin-pwa/client"]
+		"types": [
+			"jest",
+			"@testing-library/jest-dom",
+			"vite-plugin-pwa/client",
+		]
 	},
 	"include": ["src"],
 	"references": [{ "path": "./tsconfig.node.json" }]

@@ -1,8 +1,16 @@
-import { FC, useEffect, useState } from 'react'
+import { FC, useEffect, useState, useRef } from 'react'
+// eslint-disable-next-line import/no-unresolved
+import { useRegisterSW } from 'virtual:pwa-register/react'
+
+declare class TimestampTrigger {
+	constructor(time: number)
+}
 
 const App: FC = () => {
 	const [NotificationPermission, SetNotificationPermission] =
 		useState<PermissionState>('prompt')
+
+	const ServiceWorkerRegistrationRef = useRef<ServiceWorkerRegistration>()
 
 	useEffect(() => {
 		const func = async () => {
@@ -40,6 +48,22 @@ const App: FC = () => {
 		})
 	}
 
+	const TestDelayedNotification = () => {
+		// Enable
+		// https://developer.chrome.com/docs/web-platform/notification-triggers/#enabling-via-aboutflags
+
+		ServiceWorkerRegistrationRef.current?.showNotification('x', {
+			showTrigger: new TimestampTrigger(Date.now() + 1 * 5000),
+			// eslint-disable-next-line @typescript-eslint/no-explicit-any
+		} as any)
+	}
+
+	useRegisterSW({
+		onRegisteredSW(_, registration) {
+			ServiceWorkerRegistrationRef.current = registration
+		},
+	})
+
 	return (
 		<div>
 			<h1>React PWA Scheduled Notification</h1>
@@ -49,6 +73,9 @@ const App: FC = () => {
 			<p>Notification Permission {NotificationPermission}</p>
 
 			<button onClick={TestNotification}>Test Notification</button>
+			<button onClick={TestDelayedNotification}>
+				Test Delayed Notification
+			</button>
 		</div>
 	)
 }
