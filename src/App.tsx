@@ -1,21 +1,55 @@
-import { FC, useState } from 'react'
+import { FC, useEffect, useState } from 'react'
 
 const App: FC = () => {
-	const [count, setCount] = useState(0)
+	const [NotificationPermission, SetNotificationPermission] =
+		useState<PermissionState>('prompt')
+
+	useEffect(() => {
+		const func = async () => {
+			const permissionStatus = await navigator.permissions.query({
+				name: 'notifications',
+			})
+
+			SetNotificationPermission(permissionStatus.state)
+
+			permissionStatus.addEventListener('change', () => {
+				SetNotificationPermission(permissionStatus.state)
+			})
+		}
+
+		func()
+	}, [])
+
+	const RequestNotificationPermission = async () => {
+		if (Notification.permission === 'granted') return
+
+		if (Notification.permission === 'denied') {
+			alert('Permission already denied')
+
+			return
+		}
+
+		const permission = await Notification.requestPermission()
+
+		alert(`Permission ${permission}`)
+	}
+
+	const TestNotification = () => {
+		new Notification('Test Notification', {
+			body: 'Test Notification Body',
+		})
+	}
 
 	return (
-		<main className='App'>
-			<img src='favicon.ico' alt='PWA Logo' width='60' height='60' />
-			<h1 className='App-title'>PWA React!</h1>
-			<p>
-				<button
-					type='button'
-					onClick={() => setCount(count => count + 1)}
-				>
-					count is: {count}
-				</button>
-			</p>
-		</main>
+		<div>
+			<h1>React PWA Scheduled Notification</h1>
+			<button onClick={RequestNotificationPermission}>
+				Request Notification Permission
+			</button>
+			<p>Notification Permission {NotificationPermission}</p>
+
+			<button onClick={TestNotification}>Test Notification</button>
+		</div>
 	)
 }
 
