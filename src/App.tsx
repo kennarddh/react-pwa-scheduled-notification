@@ -1,5 +1,4 @@
 import { FC, useState } from 'react'
-import ReloadPrompt from './ReloadPrompt'
 
 const App: FC = () => {
 	const [count, setCount] = useState(0)
@@ -16,7 +15,6 @@ const App: FC = () => {
 					count is: {count}
 				</button>
 			</p>
-			<ReloadPrompt />
 		</main>
 	)
 }
