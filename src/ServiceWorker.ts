@@ -6,10 +6,8 @@ import { ExpirationPlugin } from 'workbox-expiration'
 import { StaleWhileRevalidate } from 'workbox-strategies'
 
 declare const self: ServiceWorkerGlobalScope
-const wbManifest = self.__WB_MANIFEST
 
-console.log('htllo', wbManifest)
-precacheAndRoute(wbManifest)
+precacheAndRoute(self.__WB_MANIFEST)
 
 self.skipWaiting()
 clientsClaim()
