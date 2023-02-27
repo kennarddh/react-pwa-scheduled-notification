@@ -1,10 +1,11 @@
-import { defineConfig, loadEnv } from 'vite'
+import { defineConfig, loadEnv, PluginOption } from 'vite'
 
 // Plugin
 import eslintPlugin from 'vite-plugin-eslint'
 import svgr from 'vite-plugin-svgr'
 import react from '@vitejs/plugin-react'
 import { VitePWA } from 'vite-plugin-pwa'
+import mkcert from 'vite-plugin-mkcert'
 
 import { resolve } from 'path'
 
@@ -37,43 +38,66 @@ export default defineConfig(({ mode }) => {
 
 	const appEnv = loadEnv(mode, process.cwd(), envPrefix)
 
+	const plugins: PluginOption[] = [
+		mkcert(),
+		react(),
+		VitePWA({
+			devOptions: {
+				enabled: mode === 'development',
+				type: 'module',
+				navigateFallback: 'index.html',
+			},
+			registerType: 'autoUpdate',
+			strategies: 'injectManifest',
+			srcDir: 'src',
+			filename: 'ServiceWorker.ts',
+			injectRegister: null,
+			manifest: {
+				name: 'React JS Boilerplate',
+				short_name: 'React JS Boilerplate',
+				theme_color: '#ffffff',
+				display: 'standalone',
+				description: 'My Awesome App description',
+				icons: [
+					{
+						src: 'pwa-192x192.png',
+						sizes: '192x192',
+						type: 'image/png',
+					},
+					{
+						src: 'pwa-512x512.png',
+						sizes: '512x512',
+						type: 'image/png',
+					},
+					{
+						src: 'mask-icon.png',
+						sizes: '930x930',
+						type: 'image/png',
+						purpose: 'maskable',
+					},
+				],
+			},
+		}),
+		svgr(),
+	]
+
+	if (mode === 'development') {
+		plugins.push(
+			eslintPlugin({
+				exclude: ['/dev-sw.js', '/workbox-*.js'],
+			})
+		)
+	}
+
 	return {
-		plugins: [
-			react(),
-			eslintPlugin(),
-			svgr(),
-			VitePWA({
-				registerType: 'autoUpdate',
-				injectRegister: 'inline',
-				workbox: {
-					globPatterns: ['**/*.{js,css,html,ico,png,svg}'],
-				},
-				manifest: {
-					name: 'React JS Boilerplate',
-					short_name: 'React JS Boilerplate',
-					description: 'My Awesome App description',
-					theme_color: '#ffffff',
-					icons: [
-						{
-							src: 'pwa-192x192.png',
-							sizes: '192x192',
-							type: 'image/png',
-						},
-						{
-							src: 'pwa-512x512.png',
-							sizes: '512x512',
-							type: 'image/png',
-						},
-					],
-				},
-			}),
-		],
+		plugins,
 		resolve: {
 			alias: resolveAlias,
 		},
 		server: {
 			port: PORT || 3000,
 			open: OPEN_BROWSER === 'true' ? true : false,
+			https: true,
 		},
 		envPrefix,
 		build: {
